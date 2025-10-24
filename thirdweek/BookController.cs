@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using thirdweek.Models;
+﻿using BuisnessLogic;
+using Microsoft.AspNetCore.Mvc;
+using DatabaseLayer.Models;
+using DatabaseLayer;
 
 namespace thirdweek
 {
@@ -7,80 +9,86 @@ namespace thirdweek
     [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
-        IBookRepository _repository;
-        IAuthorRepository _authorRepository;
-        public BookController(IBookRepository repository, IAuthorRepository authorRepository) { _repository = repository; _authorRepository = authorRepository; }
+        BookService _bookService;
+        AuthorService _authorService;
+        public BookController(BookService bookService, AuthorService authorService) { _bookService = bookService; _authorService = authorService; }
 
-        [HttpGet("Book/{id}")]
-        public IActionResult GetAuthorById(int id)
+        [HttpGet("{id}")]
+        public IActionResult GetBookById(int id)
         {
-            Book book = _repository.GetBookById(id);
-            if (book != null)
+            try
             {
+                Book book = _bookService.GetBookById(id);
                 return Ok(book);
             }
-            else
+            catch (ArgumentException ex)
             {
-                return NotFound();
+                return NotFound(ex.Message);
             }
-
         }
 
         [HttpGet]
         public IActionResult GetAllBooks()
         {
-            List<Book> book = _repository.GetAllBooks();
-            if (book.Count > 0)
+            try
             {
-                return Ok(book);
+                List<Book> books = _bookService.GetAllBooks();
+                return Ok(books);
             }
-            else { return NoContent(); }
-
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public IActionResult AddBook(string title, DateOnly? publishDate, int? authorId)
         {
-            if (string.IsNullOrWhiteSpace(title) || !publishDate.HasValue || !authorId.HasValue)
-                return BadRequest("Необходимо передать title, publishDate и authorId");
+            try
+            {
+                if (!publishDate.HasValue || !authorId.HasValue)
+                    return BadRequest("Необходимо указать publishDate и authorId");
 
-            var author = _authorRepository.GetAuthorById(authorId.Value);
-            if (author == null)
-                return NotFound("Автор с таким id не существует");
-
-            bool result = _repository.AddBook(title, publishDate.Value, authorId.Value);
-            if (!result)
-                return BadRequest("Книга не была добавлена");
-
-            return Ok(true);
-
+                _bookService.AddBook(title, publishDate.Value, authorId.Value);
+                return Ok("Книга успешно добавлена");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateBook(int id, string? title, DateOnly? publishDate, int? authorId )
+        public IActionResult UpdateBook(int id, string? title, DateOnly? publishDate, int? authorId)
         {
-            var existing = _repository.GetBookById(id);
-            if (existing == null) return NotFound();
-            if (authorId.HasValue)
+            try
             {
-                var author = _authorRepository.GetAuthorById(authorId.Value);
-                if (author == null)
-                    return NotFound("Автор с таким id не существует");
-            }
+                if (authorId.HasValue)
+                {
+                    _authorService.GetAuthorById(authorId.Value);
+                }
 
-            bool result = _repository.ModifyBook(id, title, publishDate, authorId);
-            if (!result) return BadRequest();
-            return Ok(true);
+                _bookService.ModifyBook(id, title, publishDate, authorId);
+                return Ok("Книга успешно обновлена");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(int id)
         {
-            var existing = _repository.GetBookById(id);
-            if (existing == null) return NotFound();
-            bool result = _repository.DeleteBook(id);
-            if (!result) return BadRequest();
-            return Ok(true);
+            try
+            {
+                _bookService.DeleteBook(id);
+                return Ok("Книга успешно удалена");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

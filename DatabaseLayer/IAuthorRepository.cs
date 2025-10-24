@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http.Metadata;
-using thirdweek.Models;
+using DatabaseLayer.Models;
 
-namespace thirdweek
+namespace DatabaseLayer
 {
     public interface IAuthorRepository
     {
         Author GetAuthorById(int id);
         List<Author> GetAllAuthors();
-        bool AddAuthor(string name, DateOnly DateOfBirth);
-        bool ModifyAuthor(int id, string? name, DateOnly? dateOfBirth);
+        void AddAuthor(Author author);
+        void ModifyAuthor(Author author);
         bool DeleteAuthor(int id);
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.Json.Serialization;
-using System.Xml.Linq;
-using thirdweek.Models;
+using DatabaseLayer.Models;
+using BuisnessLogic;
 
 namespace thirdweek
 {
@@ -9,75 +8,92 @@ namespace thirdweek
     [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
-        IAuthorRepository _repository;
-        IBookRepository _bookRepository;
-        public AuthorController(IAuthorRepository repository, IBookRepository bookRepository) { _repository = repository; _bookRepository = bookRepository; }
+        private readonly AuthorService _authorService;
+        private readonly BookService _bookService;
+        
+        public AuthorController(AuthorService authorService, BookService bookService) 
+        { 
+            _authorService = authorService; 
+            _bookService = bookService; 
+        }
 
-        [HttpGet("author/{id}")]
+        [HttpGet("{id}")]
         public IActionResult GetAuthorById(int id)
         {
-            Author author = _repository.GetAuthorById(id);
-            if (author != null)
+            try
             {
+                Author author = _authorService.GetAuthorById(id);
                 return Ok(author);
             }
-            else
+            catch (ArgumentException ex)
             {
-                return NotFound();
+                return NotFound(ex.Message);
             }
-
         }
 
         [HttpGet]
         public IActionResult GetAllAuthors()
         {
-            List<Author> authors = _repository.GetAllAuthors();
-            if (authors.Count > 0)
+            try
             {
+                List<Author> authors = _authorService.GetAllAuthors();
                 return Ok(authors);
             }
-            else { return NoContent(); }
-
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ошибка сервера: {ex.Message}");
+            }
         }
 
         [HttpPost]
         public IActionResult AddAuthor(string name, DateOnly? dateOfBirth)
         {
-            if (string.IsNullOrWhiteSpace(name) || !dateOfBirth.HasValue)
-                return BadRequest("Необходимо передать name и dateOfBirth");
+            try
+            {
+                if (!dateOfBirth.HasValue)
+                    return BadRequest("Необходимо указать dateOfBirth");
 
-            bool result = _repository.AddAuthor(name, dateOfBirth.Value);
-            if (!result) return BadRequest("Автор не был добавлен");
-            return Ok(true);
-
+                _authorService.AddAuthor(name, dateOfBirth.Value);
+                return Ok("Автор успешно добавлен");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateAuthor(int id, string? name, DateOnly? dateOfBirth)
         {
-            var author = _repository.GetAuthorById(id);
-            if (author == null) return NotFound();
-
-            bool result = _repository.ModifyAuthor(id, name, dateOfBirth);
-            if (!result) return BadRequest();
-            return Ok(true);
+            try
+            {
+                _authorService.ModifyAuthor(id, name, dateOfBirth);
+                return Ok("Автор успешно обновлен");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteAuthor(int id)
         {
-            var author = _repository.GetAuthorById(id);
-            if (author == null) return NotFound();
-
-            var books = _bookRepository.GetAllBooks().Where(b => b.AuthorId == id).ToList();
-            foreach (var book in books)
+            try
             {
-                _bookRepository.DeleteBook(book.Id);
-            }
+                var books = _bookService.GetAllBooks().Where(b => b.AuthorId == id).ToList();
+                foreach (var book in books)
+                {
+                    _bookService.DeleteBook(book.Id);
+                }
 
-            bool result = _repository.DeleteAuthor(id);
-            if (!result) return BadRequest();
-            return Ok(true);
+                _authorService.DeleteAuthor(id);
+                return Ok("Автор и связанные книги успешно удалены");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

@@ -10,4 +10,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\BuisnessLogic\BuisnessLogic.csproj" />
+    <ProjectReference Include="..\DatabaseLayer\DatabaseLayer.csproj" />
+  </ItemGroup>
+
 </Project>

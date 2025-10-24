@@ -1,6 +1,6 @@
-﻿namespace thirdweek.Models
+﻿namespace DatabaseLayer.Models
 {
-    public class Book
+    public record Book
     {
         public int Id { get; set; }
         public string Title { get; set; }
