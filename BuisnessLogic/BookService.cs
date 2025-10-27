@@ -1,9 +1,10 @@
 using DatabaseLayer;
 using DatabaseLayer.Models;
-
+using DatabaseLayer.Interfaces;
+using BuisnessLogic.Interfaces;
 namespace BuisnessLogic;
 
-public class BookService(IBookRepository repository)
+public class BookService(IBookRepository repository) : IBookService
 {
     public Book GetBookById(int id)
     {

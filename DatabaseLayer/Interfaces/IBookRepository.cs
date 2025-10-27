@@ -1,6 +1,6 @@
 ﻿using DatabaseLayer.Models;
 
-namespace DatabaseLayer
+namespace DatabaseLayer.Interfaces
 {
     public interface IBookRepository
     {

@@ -1,9 +1,11 @@
+using BuisnessLogic.Interfaces;
 using DatabaseLayer;
 using DatabaseLayer.Models;
+using DatabaseLayer.Interfaces;
 
 namespace BuisnessLogic;
 
-public class AuthorService(IAuthorRepository repository)
+public class AuthorService(IAuthorRepository repository) : IAuthorService
 {
     public Author GetAuthorById(int id)
     {

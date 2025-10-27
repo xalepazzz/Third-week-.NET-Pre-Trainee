@@ -1,4 +1,4 @@
-﻿using System.Data.SqlTypes;
+﻿using DatabaseLayer.Interfaces;
 using DatabaseLayer.Models;
 
 namespace DatabaseLayer

@@ -1,10 +1,11 @@
 ﻿using DatabaseLayer.Models;
+using DatabaseLayer.Interfaces;
 
 namespace DatabaseLayer
 {
     public class BookRepository : IBookRepository
     {
-        private List<Book> _storage;
+        private static List<Book> _storage;
         public BookRepository()
         {
             _storage = new List<Book>();

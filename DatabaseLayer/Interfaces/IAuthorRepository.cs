@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http.Metadata;
-using DatabaseLayer.Models;
+﻿using DatabaseLayer.Models;
 
-namespace DatabaseLayer
+namespace DatabaseLayer.Interfaces
 {
     public interface IAuthorRepository
     {

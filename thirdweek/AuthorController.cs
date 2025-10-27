@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using BuisnessLogic.Interfaces;
 using DatabaseLayer.Models;
 using BuisnessLogic;
 
@@ -8,10 +9,10 @@ namespace thirdweek
     [Route("api/[controller]")]
     public class AuthorController : ControllerBase
     {
-        private readonly AuthorService _authorService;
-        private readonly BookService _bookService;
+        private readonly IAuthorService _authorService;
+        private readonly IBookService _bookService;
         
-        public AuthorController(AuthorService authorService, BookService bookService) 
+        public AuthorController(IAuthorService authorService, IBookService bookService) 
         { 
             _authorService = authorService; 
             _bookService = bookService; 
